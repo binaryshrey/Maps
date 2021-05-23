@@ -46,6 +46,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         map.addMarker(MarkerOptions().position(sydney))
 
         setMapOnLongClick(map)
+        setPoiClick(map)
+    }
+
+    private fun setPoiClick(map: GoogleMap) {
+        map.setOnPoiClickListener { pointOfInterest ->
+            map.addMarker(MarkerOptions()
+                    .title(pointOfInterest.name)
+                    .position(pointOfInterest.latLng)).showInfoWindow()
+        }
     }
 
     private fun setMapOnLongClick(map: GoogleMap) {
