@@ -1,22 +1,24 @@
 package com.example.maps
 
-import androidx.appcompat.app.AppCompatActivity
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import java.util.*
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var map: GoogleMap
+    private val REQUEST_LOCATION_PERMISSION = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,12 +44,38 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         // Add a marker in Sydney and move the camera
         val sydney = LatLng(-34.0, 151.0)
         val zoomLevel = 15f
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney,zoomLevel))
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, zoomLevel))
         map.addMarker(MarkerOptions().position(sydney))
 
+        enableMyLocation()
         setMapOnLongClick(map)
         setPoiClick(map)
     }
+
+
+    private fun enableMyLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf<String>(Manifest.permission.ACCESS_FINE_LOCATION),
+                    REQUEST_LOCATION_PERMISSION
+            )
+
+        } else {
+            map.setMyLocationEnabled(true)
+        }
+
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_LOCATION_PERMISSION) {
+            if (grantResults.size > 0 && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                enableMyLocation()
+            }
+        }
+    }
+
 
     private fun setPoiClick(map: GoogleMap) {
         map.setOnPoiClickListener { pointOfInterest ->
@@ -60,7 +88,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun setMapOnLongClick(map: GoogleMap) {
 
         map.setOnMapLongClickListener { latLng ->
-            Log.i("MapsActivity","${latLng.longitude} , ${latLng.latitude}")
+            Log.i("MapsActivity", "${latLng.longitude} , ${latLng.latitude}")
             map.addMarker(MarkerOptions()
                     .position(latLng)
                     .title(getString(R.string.pin))
@@ -73,12 +101,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater = menuInflater
-        inflater.inflate(R.menu.menu,menu)
+        inflater.inflate(R.menu.menu, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId){
+        when (item.itemId) {
             R.id.normal_map -> {
                 map.mapType = GoogleMap.MAP_TYPE_NORMAL
                 true
