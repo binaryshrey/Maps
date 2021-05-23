@@ -2,6 +2,7 @@ package com.example.maps
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 
@@ -11,6 +12,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import java.util.*
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -39,8 +41,25 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // Add a marker in Sydney and move the camera
         val sydney = LatLng(-34.0, 151.0)
-        map.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        map.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        val zoomLevel = 15f
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney,zoomLevel))
+        map.addMarker(MarkerOptions().position(sydney))
+
+        setMapOnLongClick(map)
+    }
+
+    private fun setMapOnLongClick(map: GoogleMap) {
+
+        map.setOnMapLongClickListener { latLng ->
+            Log.i("MapsActivity","${latLng.longitude} , ${latLng.latitude}")
+            map.addMarker(MarkerOptions()
+                    .position(latLng)
+                    .title(getString(R.string.pin))
+                    .snippet("${latLng.longitude} , ${latLng.latitude}")
+
+            ).showInfoWindow()
+
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
